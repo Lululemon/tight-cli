@@ -1,0 +1,18 @@
+from flywheel import Model, Field, Engine
+import os
+
+# DynamoDB Model
+class {{ class_name }}(Model):
+    __metadata__ = {
+        '_name': '%s-%s-{{ table_name }}' % (os.environ['NAME'], os.environ['STAGE']),
+        'throughput': {
+            'read': 1,
+            'write': 1
+        }
+    }
+
+    id = Field(type=unicode, hash_key=True)
+
+    # Constructor
+    def __init__(self, id):
+        self.id = id

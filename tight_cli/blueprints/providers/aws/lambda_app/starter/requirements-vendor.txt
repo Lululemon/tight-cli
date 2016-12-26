@@ -1,0 +1,1 @@
+git+git://github.com/michaelorionmcmanus/tight.git#egg=tight

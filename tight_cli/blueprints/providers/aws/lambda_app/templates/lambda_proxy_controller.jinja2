@@ -1,0 +1,32 @@
+from tight.providers.aws.clients import dynamo_db
+import tight.providers.aws.controllers.lambda_proxy_event as lambda_proxy
+db = dynamo_db.connect()
+
+@lambda_proxy.get
+def get_handler(*args, **kwargs):
+    return {
+        'statusCode': 200,
+        'body': {
+            'hello': 'world'
+        }
+    }
+
+@lambda_proxy.post
+def post_handler(*args, **kwargs):
+    pass
+
+@lambda_proxy.put
+def put_handler(*args, **kwargs):
+    pass
+
+@lambda_proxy.patch
+def patch_handler(*args, **kwargs):
+    pass
+
+@lambda_proxy.options
+def options_handler(*args, **kwargs):
+    pass
+
+@lambda_proxy.delete
+def delete_handler(*args, **kwargs):
+    pass

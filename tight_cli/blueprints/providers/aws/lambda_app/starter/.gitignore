@@ -1,0 +1,14 @@
+__pycache__
+.DS_Store
+.tmp
+.cache
+__init__.pyc
+.vscode
+.serverless
+app/vendored
+node_modules
+admin.env
+*.pyc
+.env
+env.yml
+.idea

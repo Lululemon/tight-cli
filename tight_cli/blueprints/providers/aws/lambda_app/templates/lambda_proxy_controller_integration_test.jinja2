@@ -1,0 +1,15 @@
+import os, json
+here = os.path.dirname(os.path.realpath(__file__))
+from tight.core.test_helpers import playback, record, expected_response_body
+
+def test_get_method(app, dynamo_db_session):
+    playback(__file__, dynamo_db_session, test_get_method.__name__)
+    context = {}
+    event = {
+        'httpMethod': 'GET'
+    }
+    actual_response = app.{{name}}(event, context)
+    actual_response_body = json.loads(actual_response['body'])
+    expected_response = expected_response_body(here, 'expectations/test_get_method.yml', actual_response)
+    assert actual_response['statusCode'] == 200, 'The response statusCode is 200'
+    assert actual_response_body == expected_response, 'Expected response body matches the actual response body.'

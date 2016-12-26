@@ -1,0 +1,3 @@
+def test_no_boom():
+    module = __import__('app.functions.{{ name }}.handler')
+    assert module
