@@ -1,2 +1,2 @@
-import tight.providers.aws.lambda_app.app as app
+from app.vendored.tight.providers.aws.lambda_app import app as app
 app.run()

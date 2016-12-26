@@ -1,4 +1,4 @@
-import click, os, sys, shutil, subprocess, yaml, glob
+import click, os, sys, shutil, subprocess, yaml, glob, time
 from os.path import basename, isfile
 from inflector import Inflector, English
 from colorama import init
@@ -304,6 +304,32 @@ def rundb():
     dynamo_process.wait()
 
 
+@click.command()
+def artifact():
+    name = CONFIG['name']
+    zip_name = './builds/{}-artifact-{}.zip'.format(name, int(time.time()))
+
+    if os.path.exists('./builds'):
+        shutil.rmtree('./builds')
+
+    os.mkdir('./builds')
+
+    directory_list = ['./app']
+    file_list = ['./app_index.py', './env.dist.yml', 'tight.yml']
+
+
+    create_zip = ['zip', '-9', zip_name]
+    subprocess.call(create_zip)
+
+    for dir in directory_list:
+        command = ['zip', zip_name, '-r', dir]
+        subprocess.call(command)
+
+    for file in file_list:
+        command = ['zip', zip_name, '-g', file]
+        subprocess.call(command)
+
+
 main.add_command(generate)
 main.add_command(pip)
 main.add_command(dynamo)
@@ -312,6 +338,7 @@ generate.add_command(app)
 generate.add_command(function)
 generate.add_command(env)
 generate.add_command(model)
+generate.add_command(artifact)
 dynamo.add_command(generateschema)
 dynamo.add_command(installdb)
 dynamo.add_command(rundb)
