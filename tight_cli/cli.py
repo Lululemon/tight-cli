@@ -9,10 +9,10 @@ from collections import namedtuple
 from flywheel import Engine
 
 init()
-inflector = Inflector(English)
 
-here = os.path.dirname(os.path.realpath(__file__))
-LAMBDA_APP_TEMPLATES = '{}/blueprints/providers/aws/lambda_app/templates'.format(here)
+INFLECTOR = Inflector(English)
+HERE = os.path.dirname(os.path.realpath(__file__))
+LAMBDA_APP_TEMPLATES = '{}/blueprints/providers/aws/lambda_app/templates'.format(HERE)
 CWD = os.getcwd()
 CONFIG = {}
 VENDOR_DIR = None
@@ -127,8 +127,8 @@ def function(provider, type, name):
 
 def generate_app_aws_lambda(name, target):
     click.echo(color(target))
-    here = os.path.dirname(os.path.realpath(__file__))
-    shutil.copytree('{}/blueprints/providers/aws/lambda_app/starter'.format(here), '{}/{}'.format(target, name))
+    HERE = os.path.dirname(os.path.realpath(__file__))
+    shutil.copytree('{}/blueprints/providers/aws/lambda_app/starter'.format(HERE), '{}/{}'.format(target, name))
     template = get_template(LAMBDA_APP_TEMPLATES, 'tight.yml.jinja2')
     with open('{}/{}/tight.yml'.format(target, name), 'w') as tight_yml:
         tight_yml.write(template.render(name=name))
@@ -164,6 +164,17 @@ def install(*args, **kwargs):
         command = ['pip', 'install', '-r', requirements_file, '-t',
                    '{}/{}'.format(CWD, target), '--upgrade']
         subprocess.call(command)
+        botocore_path = '{}/botocore'.format(target)
+        boto3_path = '{}/boto3'.format(target)
+        if os.path.exists(botocore_path):
+            shutil.rmtree(botocore_path)
+            subprocess.call(['rm -rf {}/{}-*'.format(CWD, botocore_path)], shell=True)
+            click.echo(color(message='Removed botocore from {}'.format(target)))
+        if os.path.exists(boto3_path):
+            shutil.rmtree(boto3_path)
+            subprocess.call(['rm -rf {}/{}-*'.format(CWD, boto3_path)], shell=True)
+            click.echo(color(message='Removed boto3 from {}'.format(target)))
+
 
 @click.command()
 @click.option('--source', default=ENV_DIST)
@@ -184,8 +195,8 @@ def env(*args, **kwargs):
 @click.argument('name')
 def model(*args, **kwargs):
     model_name = kwargs.pop('name')
-    class_name = inflector.camelize(model_name)
-    table_name = inflector.tableize(class_name)
+    class_name = INFLECTOR.camelize(model_name)
+    table_name = INFLECTOR.tableize(class_name)
     table_name = table_name.replace('_', '-')
     template = get_template(LAMBDA_APP_TEMPLATES, 'flywheel_model.jinja2')
     with open('{}/app/models/{}.py'.format(CWD, class_name), 'w') as file:
@@ -342,4 +353,3 @@ generate.add_command(artifact)
 dynamo.add_command(generateschema)
 dynamo.add_command(installdb)
 dynamo.add_command(rundb)
-
