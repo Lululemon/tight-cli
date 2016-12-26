@@ -126,12 +126,16 @@ def function(provider, type, name):
 
 
 def generate_app_aws_lambda(name, target):
-    click.echo(color(target))
     HERE = os.path.dirname(os.path.realpath(__file__))
     shutil.copytree('{}/blueprints/providers/aws/lambda_app/starter'.format(HERE), '{}/{}'.format(target, name))
-    template = get_template(LAMBDA_APP_TEMPLATES, 'tight.yml.jinja2')
+    app_name = INFLECTOR.underscore(name).replace('_', '-')
     with open('{}/{}/tight.yml'.format(target, name), 'w') as tight_yml:
-        tight_yml.write(template.render(name=name))
+        template = get_template(LAMBDA_APP_TEMPLATES, 'tight.yml.jinja2')
+        tight_yml.write(template.render(name=app_name))
+
+    with open('{}/{}/conftest.py'.format(target, name), 'w') as conftest_template:
+        template = get_template(LAMBDA_APP_TEMPLATES, 'conftest.jinja2')
+        conftest_template.write(template.render(name=app_name))
 
 
 @click.group()
@@ -277,6 +281,7 @@ def installdb():
 @click.command()
 def rundb():
     load_env()
+    os.environ['AWS_REGION'] = 'us-west-2'
     shared_db = './dynamo_db/shared-local-instance.db'
     if os.path.exists(shared_db):
         os.remove(shared_db)
