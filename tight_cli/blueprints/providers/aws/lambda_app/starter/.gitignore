@@ -12,3 +12,5 @@ admin.env
 .env
 env.yml
 .idea
+builds
+builds/*
