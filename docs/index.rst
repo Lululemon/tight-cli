@@ -10,9 +10,9 @@ TIGHT CLI
     :maxdepth: 2
     :glob:
 
+    topics/overview
     topics/installation
-    topics/usage
-    topics/deployment
+    topics/reference
     topics/tutorial
 
 ..
