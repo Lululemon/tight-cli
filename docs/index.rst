@@ -17,6 +17,7 @@ Tight is a toolset that helps you build and maintain serverless APIs and service
     topics/overview
     topics/installation
     topics/reference
+    topics/tight_reference
     topics/tutorial
     topics/package
 
