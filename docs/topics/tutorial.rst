@@ -16,4 +16,5 @@ Tutorial
     tutorial/models_and_data
     tutorial/working_with_responses
     tutorial/creating_an_artifact
+    tutorial/deploy_to_aws
     tutorial/deploy_with_serverless

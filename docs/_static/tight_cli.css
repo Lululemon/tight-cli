@@ -1,0 +1,11 @@
+.codeblock div[class^='highlight'],
+pre.literal-block div[class^='highlight'],
+.rst-content .literal-block div[class^='highlight'],
+div[class^='highlight'] div[class^='highlight'],
+.codeblock, pre.literal-block, .rst-content .literal-block, .rst-content pre.literal-block, div[class^='highlight'] {
+    background: #2b2b2b;
+}
+
+div[class^='highlight'] pre {
+    color: white;
+}
