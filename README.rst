@@ -2,7 +2,9 @@
 tight-cli
 #########
 
-.. image:: http://tight-cli.readthedocs.io/en/latest/?badge=latest
+.. image:: https://readthedocs.org/projects/tight-cli/badge/?version=latest
+:target: http://tight-cli.readthedocs.io/en/latest/?badge=latest
+:alt: Documentation Status
 
 Tight is an application building toolset created and optimized for serverless runtimes. With ``tight-cli`` and ``tight`` you can quickly scaffold serverless applications that are conventional, testable-by-default and free of boilerplate.
 
