@@ -12,6 +12,9 @@ tight-cli
     :target: http://tight-cli.readthedocs.io/en/latest/?badge=latest
     :alt: Documentation Status
 
+.. image:: https://travis-ci.org/michaelorionmcmanus/tight-cli.svg?branch=master
+    :target: https://travis-ci.org/michaelorionmcmanus/tight-cli
+
 Tight is an application building toolset created and optimized for serverless runtimes. With ``tight-cli`` and ``tight`` you can quickly scaffold serverless applications that are conventional, testable-by-default and free of boilerplate.
 
 **Tight currently supports AWS Lambda and the Python2.7 runtime.**
