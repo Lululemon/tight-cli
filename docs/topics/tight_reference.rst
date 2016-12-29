@@ -1,8 +1,8 @@
-.. _reference:
+.. _tight_reference:
 
-###################
-Framework Reference
-###################
+#########
+``tight``
+#########
 
 *********************
 ``tight.core.logger``

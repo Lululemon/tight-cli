@@ -1,12 +1,12 @@
 .. _reference:
 
-#####################
-CLI Reference & Usage
-#####################
+#############
+``tight-cli``
+#############
 
-**********************
+******************
 ``tight generate``
-**********************
+******************
 
 *************
 ``tight pip``
@@ -16,6 +16,11 @@ CLI Reference & Usage
 ``tight dynamo``
 ****************
 
-*************
-tight-cli api
-*************
+****************
+Module Reference
+****************
+
+.. automodule:: tight_cli.cli
+    :members:
+    :undoc-members:
+    :show-inheritance:

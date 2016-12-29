@@ -12,14 +12,19 @@ Tight is an application building toolset created and optimized for serverless ru
 .. toctree::
     :maxdepth: 2
     :glob:
+    :caption: Getting Started & Tutorial
 
     topics/overview
     topics/installation
+    topics/tutorial
+
+.. toctree::
+    :maxdepth: 2
+    :glob:
+    :caption: Reference & Usage
+
     topics/reference
     topics/tight_reference
-    topics/tutorial
-    topics/package
-
 ..
    Indices and tables
    ==================

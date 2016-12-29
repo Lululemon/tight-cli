@@ -2,3 +2,4 @@ sphinx
 sphinx-autobuild
 sphinx_rtd_theme
 git+git://github.com/michaelorionmcmanus/tight.git#egg=tight
+pytest
