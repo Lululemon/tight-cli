@@ -8,6 +8,8 @@
 ``tight generate``
 ******************
 
+
+
 *************
 ``tight pip``
 *************
@@ -20,7 +22,4 @@
 Module Reference
 ****************
 
-.. automodule:: tight_cli.cli
-    :members:
-    :undoc-members:
-    :show-inheritance:
+.. autofunction:: tight_cli.cli.color
