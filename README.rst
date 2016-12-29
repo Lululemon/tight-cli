@@ -6,6 +6,8 @@ tight-cli
     :alt: tight project logo
     :align: center
 
+----------
+
 .. image:: https://readthedocs.org/projects/tight-cli/badge/?version=latest
     :target: http://tight-cli.readthedocs.io/en/latest/?badge=latest
     :alt: Documentation Status
