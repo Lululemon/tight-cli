@@ -108,4 +108,4 @@ Tight doesn't try to enforce a specific application deployment process, rather i
 Getting Started
 ***************
 
-The best way to get started with Tight is to follow the `tutorial <topics/tutorial>`_, which will guide you through the process of building and deploying an app. There are also references for both `tight <topics/tight_reference>`_ and `tight-cli <topics/reference>`_.
+The best way to get started with Tight is to follow the `tutorial <tutorial.html>`_, which will guide you through the process of building and deploying an app. There are also references for both `tight <tight_reference.html>`_ and `tight-cli <reference.html>`_.
