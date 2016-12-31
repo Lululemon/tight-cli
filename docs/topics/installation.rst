@@ -12,7 +12,7 @@ The ``tight`` and ``tight-cli`` packages are both available to install via Githu
 
 .. sourcecode:: console
 
-   $ pip install tight-cli git+git://github.com/michaelorionmcmanus/tight-cli.git#egg=tight-cli
+   $ pip install git+git://github.com/michaelorionmcmanus/tight-cli.git#egg=tight-cli
 
 *************
 ``tight``
@@ -20,4 +20,4 @@ The ``tight`` and ``tight-cli`` packages are both available to install via Githu
 
 .. sourcecode:: console
 
-   $ pip install tight git+git://github.com/michaelorionmcmanus/tight.git#egg=tight
+   $ pip install git+git://github.com/michaelorionmcmanus/tight.git#egg=tight
