@@ -146,7 +146,7 @@ def pip():
 @click.command()
 @click.argument('package_name', nargs=-1)
 @click.option('--requirements/--no-requirements', default=False)
-@click.option('--requirements-file', default=VENDOR_REQUIREMENTS_FILE, help='Platform providers', type=click.Choice([VENDOR_REQUIREMENTS_FILE]))
+@click.option('--requirements-file', default=VENDOR_REQUIREMENTS_FILE, help='Requirements file location', type=click.Choice([VENDOR_REQUIREMENTS_FILE]))
 @click.option('--target', default=VENDOR_DIR, help='Target directory.', type=click.Choice([VENDOR_DIR]))
 def install(*args, **kwargs):
     package_name = kwargs.pop('package_name')[0] if ('package_name' in kwargs) and len(kwargs['package_name']) > 0 else None
