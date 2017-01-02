@@ -137,6 +137,13 @@ def generate_app_aws_lambda(name, target):
         template = get_template(LAMBDA_APP_TEMPLATES, 'conftest.jinja2')
         conftest_template.write(template.render(name=app_name))
 
+    """ Create the app vendor directory """
+    vendordir = '{}/{}/app/vendored'.format(target, name)
+    os.mkdir(vendordir)
+
+    with open('{}/__init__.py'.format(vendordir), 'w') as init_file:
+        init_file.write('')
+
 
 @click.group()
 def pip():

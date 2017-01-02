@@ -98,7 +98,7 @@ This command will generate a function module and will also stub integration and 
 
 This command generates the following files and directories:
 
-.. sourcecode:: bash
+.. sourcecode:: shell
 
         |-app/
         |---functions/
