@@ -7,4 +7,6 @@ install:
   - pip install -e .
   - pip install -r requirements-dev.txt
 script:
-  - py.test tests
+  - py.test tests --cov=tight_cli tests/
+after_success:
+  - bash <(curl -s https://codecov.io/bash)

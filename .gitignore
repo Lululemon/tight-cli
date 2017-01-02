@@ -18,3 +18,5 @@ __pycache__/
 # docs
 _build_html
 _build
+
+.coverage
