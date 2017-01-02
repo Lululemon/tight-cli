@@ -9,6 +9,9 @@ tight-cli
 .. image:: https://travis-ci.org/michaelorionmcmanus/tight-cli.svg?branch=master
     :target: https://travis-ci.org/michaelorionmcmanus/tight-cli
 
+.. image:: https://codecov.io/gh/michaelorionmcmanus/tight-cli/branch/master/graph/badge.svg
+  :target: https://codecov.io/gh/michaelorionmcmanus/tight-cli
+
 ----
 
 Tight is an application building toolset created and optimized for serverless runtimes. With ``tight-cli`` and ``tight`` you can quickly scaffold serverless applications that are conventional, testable-by-default and free of boilerplate.
