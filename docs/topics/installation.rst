@@ -14,9 +14,9 @@ The ``tight`` and ``tight-cli`` packages are both available to install via Githu
 
    $ pip install git+git://github.com/michaelorionmcmanus/tight-cli.git#egg=tight-cli
 
-*************
+*********
 ``tight``
-*************
+*********
 
 .. sourcecode:: console
 

@@ -10,7 +10,7 @@ Tight is an application building toolset created and optimized for serverless ru
 **Tight currently supports AWS Lambda and the Python2.7 runtime.**
 
 .. toctree::
-    :maxdepth: 2
+    :maxdepth: 3
     :glob:
     :caption: Getting Started & Tutorial
 
