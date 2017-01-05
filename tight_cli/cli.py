@@ -90,9 +90,13 @@ def function(provider, type, target, name):
         if e.strerror == 'File exists':
             raise click.BadParameter('Function already exists!', param_hint='NAME')
         else:
-            raise e
-    with open('{}/__init__.py'.format(function_dir), 'w') as file:
-        file.write('')
+            raise Exception('Cannot create function dir')
+
+    try:
+        with open('{}/__init__.py'.format(function_dir), 'w') as file:
+            file.write('')
+    except Exception as e:
+        raise Exception('Could not wite function __init__.py file')
 
     template = get_template(LAMBDA_APP_TEMPLATES, 'lambda_proxy_controller.jinja2')
 
@@ -137,7 +141,7 @@ def function(provider, type, target, name):
         template = get_template(LAMBDA_APP_TEMPLATES, 'lambda_proxy_controller_get_expectation.jinja2')
         file.write(template.render(name=name))
 
-    command = ['pytest', '{}/tests'.format(target)]
+    command = ['py.test', '{}/tests'.format(target)]
     subprocess.call(command)
     click.echo(color(message='Successfully generated function and tests!'))
 
