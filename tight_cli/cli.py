@@ -90,7 +90,7 @@ def function(provider, type, target, name):
         if e.strerror == 'File exists':
             raise click.BadParameter('Function already exists!', param_hint='NAME')
         else:
-            raise e
+            raise Exception('Cannot create function dir')
     with open('{}/__init__.py'.format(function_dir), 'w') as file:
         file.write('')
 
