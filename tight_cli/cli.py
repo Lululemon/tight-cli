@@ -104,10 +104,26 @@ def function(provider, type, target, name):
     integration_test_placebos_dir = '{}/tests/functions/integration/{}/placebos'.format(target, name)
     unit_test_dir = '{}/tests/functions/unit/{}'.format(target, name)
 
-    os.mkdir(integration_test_dir)
-    os.mkdir(integration_test_expectations_dir)
-    os.mkdir(integration_test_placebos_dir)
-    os.mkdir(unit_test_dir)
+    try:
+        os.mkdir(integration_test_dir)
+    except Exception as e:
+        raise Exception('Could not integration test directory')
+
+    try:
+        os.mkdir(integration_test_expectations_dir)
+    except Exception as e:
+        raise Exception('Could not integration test expectations directory')
+
+    try:
+        os.mkdir(integration_test_placebos_dir)
+    except Exception as e:
+        raise Exception('Could not integration test placebos directory')
+
+    try:
+        os.mkdir(unit_test_dir)
+    except Exception as e:
+        raise Exception('Could not unit test directory')
+
 
     with open('{}/test_integration_{}.py'.format(integration_test_dir, name), 'w') as file:
         template = get_template(LAMBDA_APP_TEMPLATES, 'lambda_proxy_controller_integration_test.jinja2')
