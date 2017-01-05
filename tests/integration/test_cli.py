@@ -39,6 +39,3 @@ def test_generate_function_verify_structure(tmpdir):
     assert os.path.isdir(function_unit_test_root)
     assert os.path.isfile('{}/test_integration_my_controller.py'.format(function_integration_test_root))
     assert os.path.isfile('{}/test_unit_my_controller.py'.format(function_unit_test_root))
-
-
-

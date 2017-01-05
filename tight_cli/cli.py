@@ -141,7 +141,7 @@ def function(provider, type, target, name):
         template = get_template(LAMBDA_APP_TEMPLATES, 'lambda_proxy_controller_get_expectation.jinja2')
         file.write(template.render(name=name))
 
-    command = ['pytest', '{}/tests'.format(target)]
+    command = ['py.test', '{}/tests'.format(target)]
     subprocess.call(command)
     click.echo(color(message='Successfully generated function and tests!'))
 
