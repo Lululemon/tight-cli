@@ -80,9 +80,10 @@ def app(provider, type, target, name):
 @click.command()
 @click.option('--provider', default='aws', help='Platform providers', type=click.Choice(['aws']))
 @click.option('--type', default='lambda_proxy', help='Function type', type=click.Choice(['lambda_proxy']))
+@click.option('--target', default=CWD, help='Location where app will be created.')
 @click.argument('name')
-def function(provider, type, name):
-    function_dir = '{}/app/functions/{}'.format(CWD, name)
+def function(provider, type, target, name):
+    function_dir = '{}/app/functions/{}'.format(target, name)
     try:
         os.mkdir(function_dir)
     except Exception as e:
@@ -98,10 +99,10 @@ def function(provider, type, name):
     with open('{}/handler.py'.format(function_dir), 'w') as file:
         file.write(template.render())
 
-    integration_test_dir = '{}/tests/functions/integration/{}'.format(CWD, name)
-    integration_test_expectations_dir = '{}/tests/functions/integration/{}/expectations'.format(CWD, name)
-    integration_test_placebos_dir = '{}/tests/functions/integration/{}/placebos'.format(CWD, name)
-    unit_test_dir = '{}/tests/functions/unit/{}'.format(CWD, name)
+    integration_test_dir = '{}/tests/functions/integration/{}'.format(target, name)
+    integration_test_expectations_dir = '{}/tests/functions/integration/{}/expectations'.format(target, name)
+    integration_test_placebos_dir = '{}/tests/functions/integration/{}/placebos'.format(target, name)
+    unit_test_dir = '{}/tests/functions/unit/{}'.format(target, name)
 
     os.mkdir(integration_test_dir)
     os.mkdir(integration_test_expectations_dir)
@@ -120,7 +121,7 @@ def function(provider, type, name):
         template = get_template(LAMBDA_APP_TEMPLATES, 'lambda_proxy_controller_get_expectation.jinja2')
         file.write(template.render(name=name))
 
-    command = ['pytest', TESTS_DIR]
+    command = ['pytest', '{}/tests'.format(target)]
     subprocess.call(command)
     click.echo(color(message='Successfully generated function and tests!'))
 
@@ -336,21 +337,25 @@ def artifact():
         shutil.rmtree('./builds')
 
     os.mkdir('./builds')
+    os.mkdir('./builds/{}-artifact'.format(name))
 
     directory_list = ['./app']
     file_list = ['./app_index.py', './env.dist.yml', 'tight.yml']
-
 
     create_zip = ['zip', '-9', zip_name]
     subprocess.call(create_zip)
 
     for dir in directory_list:
-        command = ['zip', zip_name, '-r', dir]
-        subprocess.call(command)
+        zip_dir_command = ['zip', zip_name, '-r', dir]
+        cp_dir_command = ['cp', '-R', dir, './builds/{}-artifact/'.format(name)]
+        subprocess.call(zip_dir_command)
+        subprocess.call(cp_dir_command)
 
     for file in file_list:
-        command = ['zip', zip_name, '-g', file]
-        subprocess.call(command)
+        zip_file_command = ['zip', zip_name, '-g', file]
+        cp_file_command = ['cp', file, './builds/{}-artifact/'.format(name)]
+        subprocess.call(zip_file_command)
+        subprocess.call(cp_file_command)
 
 
 main.add_command(generate)
