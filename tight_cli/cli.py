@@ -91,8 +91,12 @@ def function(provider, type, target, name):
             raise click.BadParameter('Function already exists!', param_hint='NAME')
         else:
             raise Exception('Cannot create function dir')
-    with open('{}/__init__.py'.format(function_dir), 'w') as file:
-        file.write('')
+
+    try:
+        with open('{}/__init__.py'.format(function_dir), 'w') as file:
+            file.write('')
+    except Exception as e:
+        raise Exception('Could not wite function __init__.py file')
 
     template = get_template(LAMBDA_APP_TEMPLATES, 'lambda_proxy_controller.jinja2')
 
