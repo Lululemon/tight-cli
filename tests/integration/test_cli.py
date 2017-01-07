@@ -1,5 +1,5 @@
-import click
 import os
+import yaml
 from click.testing import CliRunner
 from tight_cli import cli
 
@@ -39,3 +39,38 @@ def test_generate_function_verify_structure(tmpdir):
     assert os.path.isdir(function_unit_test_root)
     assert os.path.isfile('{}/test_integration_my_controller.py'.format(function_integration_test_root))
     assert os.path.isfile('{}/test_unit_my_controller.py'.format(function_unit_test_root))
+
+
+def test_generate_model_and_schema(tmpdir):
+    here = os.path.dirname(os.path.realpath(__file__))
+    runner = CliRunner()
+    app_dir = 'my_service'
+    target = '{}/{}/app/models'.format(tmpdir, app_dir)
+    runner.invoke(cli.app, [app_dir, '--target={}'.format(tmpdir)])
+    runner.invoke(cli.env, ['--target={}/{}'.format(tmpdir, app_dir)])
+    runner.invoke(cli.model, ['my_model', '--target={}'.format(target)])
+    model_location = '{}/MyModel.py'.format(target)
+    assert os.path.isfile(model_location)
+    runner.invoke(cli.generateschema, ['--target={}/{}'.format(tmpdir, app_dir)])
+    with open('{}/../fixtures/my-models.yml'.format(here)) as yaml_fixture:
+        yaml_fixture_dict = yaml.load(yaml_fixture)
+    with open('{}/{}/schemas/dynamo/my-models.yml'.format(tmpdir, app_dir)) as result_yaml:
+        result_yaml_dict = yaml.load(result_yaml)
+    assert yaml_fixture_dict == result_yaml_dict, 'Correct schema generated for model.'
+
+
+def test_generate_artifact(tmpdir):
+    runner = CliRunner()
+    app_dir_name = 'my_service'
+    app_dir_path = '{}/{}'.format(tmpdir, app_dir_name)
+    runner.invoke(cli.app, [app_dir_name, '--target={}'.format(tmpdir)])
+    runner.invoke(cli.artifact, ['--target={}/{}'.format(tmpdir, app_dir_name)])
+    builds_dir_path = '{}/builds'.format(app_dir_path)
+    service_artifact_path = '{}/{}'.format(builds_dir_path, 'my-service-artifact')
+    app_artifact_path = '{}/app'.format(service_artifact_path)
+    assert os.path.isdir(builds_dir_path), './builds dir created'
+    assert os.path.isdir(service_artifact_path), './builds/artifact dir created'
+    assert os.path.isdir(app_artifact_path), './builds/artifact/app dir copied'
+    assert os.listdir(service_artifact_path) == ['app', 'app_index.py', 'env.dist.yml', 'tight.yml']
+    assert os.listdir(app_artifact_path) == ['__init__.py', 'functions', 'lib', 'models', 'serializers', 'vendored']
+

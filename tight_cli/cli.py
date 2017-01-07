@@ -18,11 +18,14 @@ CONFIG = {}
 VENDOR_DIR = None
 ENV_DIST = '{}/env.dist.yml'.format(CWD)
 
-try:
-    with open('{}/tight.yml'.format(CWD)) as tight_config:
-        CONFIG = yaml.load(tight_config)
-except Exception as e:
-    pass
+def get_config(target):
+    try:
+        with open('{}/tight.yml'.format(target)) as tight_config:
+            config = yaml.load(tight_config)
+    except Exception as e:
+        pass
+
+    return config
 
 if CONFIG and 'vendor_dir' in CONFIG:
     VENDOR_DIR = CONFIG['vendor_dir']
@@ -108,26 +111,10 @@ def function(provider, type, target, name):
     integration_test_placebos_dir = '{}/tests/functions/integration/{}/placebos'.format(target, name)
     unit_test_dir = '{}/tests/functions/unit/{}'.format(target, name)
 
-    try:
-        os.mkdir(integration_test_dir)
-    except Exception as e:
-        raise Exception('Could not integration test directory')
-
-    try:
-        os.mkdir(integration_test_expectations_dir)
-    except Exception as e:
-        raise Exception('Could not integration test expectations directory')
-
-    try:
-        os.mkdir(integration_test_placebos_dir)
-    except Exception as e:
-        raise Exception('Could not integration test placebos directory')
-
-    try:
-        os.mkdir(unit_test_dir)
-    except Exception as e:
-        raise Exception('Could not unit test directory')
-
+    os.mkdir(integration_test_dir)
+    os.mkdir(integration_test_expectations_dir)
+    os.mkdir(integration_test_placebos_dir)
+    os.mkdir(unit_test_dir)
 
     with open('{}/test_integration_{}.py'.format(integration_test_dir, name), 'w') as file:
         template = get_template(LAMBDA_APP_TEMPLATES, 'lambda_proxy_controller_integration_test.jinja2')
@@ -175,8 +162,9 @@ def pip():
 @click.argument('package_name', nargs=-1)
 @click.option('--requirements/--no-requirements', default=False)
 @click.option('--requirements-file', default=VENDOR_REQUIREMENTS_FILE, help='Requirements file location', type=click.Choice([VENDOR_REQUIREMENTS_FILE]))
-@click.option('--target', default=VENDOR_DIR, help='Target directory.', type=click.Choice([VENDOR_DIR]))
+@click.option('--target', default=CWD, help='Target directory.', type=click.Choice([VENDOR_DIR]))
 def install(*args, **kwargs):
+    vendor_dir = get_config(kwargs.pop('target'))['vendor_dir']
     package_name = kwargs.pop('package_name')[0] if ('package_name' in kwargs) and len(kwargs['package_name']) > 0 else None
     requirements_file = kwargs.pop('requirements_file')
     if package_name:
@@ -209,34 +197,38 @@ def install(*args, **kwargs):
 
 
 @click.command()
-@click.option('--source', default=ENV_DIST)
+@click.option('--target', default=CWD)
 def env(*args, **kwargs):
-    source = kwargs.pop('source')
-    if not os.path.isfile('{}/env.yml'):
-        dist_env_vars = yaml.load(open(source))
-        for k, v in dist_env_vars.iteritems():
-            if os.environ.get(k):
-                dist_env_vars[k] = os.environ[k]
-        stream = file('./env.yml', 'w')
-        dist_env_vars['NAME'] = CONFIG['name'].replace('_', '-')
-        yaml.safe_dump(dist_env_vars, stream)
-        print yaml.dump(dist_env_vars)
+    target = kwargs.pop('target')
+    env_dist_path = '{}/env.dist.yml'.format(target)
+    dist_env_vars = yaml.load(open(env_dist_path))
+    for k, v in dist_env_vars.iteritems():
+        if os.environ.get(k):
+            dist_env_vars[k] = os.environ[k]
+    stream = file('{}/env.yml'.format(target), 'w')
+    dist_env_vars['NAME'] = get_config(target)['name'].replace('_', '-')
+    yaml.safe_dump(dist_env_vars, stream)
+    print yaml.dump(dist_env_vars)
 
 
 @click.command()
+@click.option('--target', default='{}/app/models'.format(CWD), help='Location to save model.')
 @click.argument('name')
-def model(*args, **kwargs):
+def model(target, **kwargs):
     model_name = kwargs.pop('name')
     class_name = INFLECTOR.camelize(model_name)
     table_name = INFLECTOR.tableize(class_name)
     table_name = table_name.replace('_', '-')
     template = get_template(LAMBDA_APP_TEMPLATES, 'flywheel_model.jinja2')
-    with open('{}/app/models/{}.py'.format(CWD, class_name), 'w') as file:
+    with open('{}/{}.py'.format(target, class_name), 'w') as file:
         file.write(template.render(class_name=class_name, table_name=table_name))
 
 
-def load_env():
-    env_vars = yaml.load(open('{}/env.yml'.format(CWD)))
+def load_env(target):
+    env_vars = yaml.load(open('{}/env.yml'.format(target)))
+    if not env_vars:
+        raise Exception('Could not load env.yml. Have you run `tight generate env`?')
+
     for k, v in env_vars.iteritems():
         os.environ[k] = str(v)
 
@@ -245,11 +237,13 @@ def dynamo():
     pass
 
 @click.command()
+@click.option('--target', default=CWD)
 def generateschema(*args, **kwargs):
-    load_env()
-    generate_cf_dynamo_schema()
+    target = kwargs.pop('target')
+    load_env(target)
+    generate_cf_dynamo_schema(target)
 
-def write_schema_to_yaml(**kwargs):
+def write_schema_to_yaml(target, **kwargs):
     properties = kwargs.copy()
     table_name = "-".join(kwargs.pop('TableName').split('-')[3:])
     properties['TableName'] = '{}-{}-{}'.format(os.environ['NAME'], os.environ['STAGE'], table_name)
@@ -257,15 +251,15 @@ def write_schema_to_yaml(**kwargs):
         'Type': 'AWS::DynamoDB::Table',
         'Properties': properties
     }
-    stream = file('./schemas/dynamo/{}.yml'
-                  .format(table_name), 'w')
+    stream = file('{}/schemas/dynamo/{}.yml'
+                  .format(target, table_name), 'w')
     yaml.safe_dump(table, stream)
 
-def generate_cf_dynamo_schema():
+def generate_cf_dynamo_schema(target):
     dynamo_connection = DynamoDBConnection()
     class FakeClient(object):
         def create_table(self, *args, **kwargs):
-            write_schema_to_yaml(**kwargs)
+            write_schema_to_yaml(target, **kwargs)
             return {}
 
     client = FakeClient()
@@ -284,8 +278,8 @@ def generate_cf_dynamo_schema():
     engine = Engine()
     engine.dynamo = dynamo
 
-    sys.path = ['./app/models'] + sys.path
-    modelModules = glob.glob('./app/models'+"/*.py")
+    sys.path = ['{}/app/models'.format(target)] + sys.path
+    modelModules = glob.glob('{}/app/models'.format(target) + '/*.py')
     models = [ basename(f)[:-3] for f in modelModules if isfile(f)]
     for modelName in models:
         if modelName != '__init__':
@@ -349,31 +343,33 @@ def rundb():
 
 
 @click.command()
-def artifact():
-    name = CONFIG['name']
-    zip_name = './builds/{}-artifact-{}.zip'.format(name, int(time.time()))
+@click.option('--target', default=CWD)
+def artifact(*args, **kwargs):
+    target = kwargs.pop('target')
+    name = get_config(target)['name']
+    zip_name = '{}/builds/{}-artifact-{}.zip'.format(target, name, int(time.time()))
+    builds_dir = '{}/builds'.format(target)
+    if os.path.exists(builds_dir):
+        shutil.rmtree(builds_dir)
 
-    if os.path.exists('./builds'):
-        shutil.rmtree('./builds')
+    os.mkdir(builds_dir)
+    os.mkdir('{}/{}-artifact'.format(builds_dir, name))
 
-    os.mkdir('./builds')
-    os.mkdir('./builds/{}-artifact'.format(name))
-
-    directory_list = ['./app']
-    file_list = ['./app_index.py', './env.dist.yml', 'tight.yml']
+    directory_list = ['{}/app'.format(target)]
+    file_list = ['{}/app_index.py'.format(target), '{}/env.dist.yml'.format(target), '{}/tight.yml'.format(target)]
 
     create_zip = ['zip', '-9', zip_name]
     subprocess.call(create_zip)
 
     for dir in directory_list:
         zip_dir_command = ['zip', zip_name, '-r', dir]
-        cp_dir_command = ['cp', '-R', dir, './builds/{}-artifact/'.format(name)]
+        cp_dir_command = ['cp', '-R', dir, '{}/builds/{}-artifact/'.format(target, name)]
         subprocess.call(zip_dir_command)
         subprocess.call(cp_dir_command)
 
     for file in file_list:
         zip_file_command = ['zip', zip_name, '-g', file]
-        cp_file_command = ['cp', file, './builds/{}-artifact/'.format(name)]
+        cp_file_command = ['cp', file, '{}/builds/{}-artifact/'.format(target, name)]
         subprocess.call(zip_file_command)
         subprocess.call(cp_file_command)
 

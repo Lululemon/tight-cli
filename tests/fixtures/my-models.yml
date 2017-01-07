@@ -1,0 +1,8 @@
+Properties:
+  AttributeDefinitions:
+  - {AttributeName: id, AttributeType: S}
+  KeySchema:
+  - {AttributeName: id, KeyType: HASH}
+  ProvisionedThroughput: {ReadCapacityUnits: 1, WriteCapacityUnits: 1}
+  TableName: my-service-dev-my-models
+Type: AWS::DynamoDB::Table
