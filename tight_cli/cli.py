@@ -162,14 +162,16 @@ def pip():
 @click.argument('package_name', nargs=-1)
 @click.option('--requirements/--no-requirements', default=False)
 @click.option('--requirements-file', default=VENDOR_REQUIREMENTS_FILE, help='Requirements file location', type=click.Choice([VENDOR_REQUIREMENTS_FILE]))
-@click.option('--target', default=CWD, help='Target directory.', type=click.Choice([VENDOR_DIR]))
+@click.option('--target', default=CWD, help='Target directory.')
 def install(*args, **kwargs):
-    vendor_dir = get_config(kwargs.pop('target'))['vendor_dir']
+    target = kwargs.pop('target')
+    vendor_dir = get_config(target)['vendor_dir']
     package_name = kwargs.pop('package_name')[0] if ('package_name' in kwargs) and len(kwargs['package_name']) > 0 else None
     requirements_file = kwargs.pop('requirements_file')
+    vendor_dir_path = '{}/{}'.format(target, vendor_dir)
     if package_name:
-        click.echo(color(message='Installing pacakage {}'.format(package_name)))
-        command = ['pip', 'install', package_name, '-t', '{}/{}'.format(CWD, VENDOR_DIR), '--upgrade']
+        click.echo(color(message='Installing pacakage {}'.format(vendor_dir_path)))
+        command = ['pip', 'install', package_name, '-t', vendor_dir_path, '--upgrade']
         subprocess.call(command)
         click.echo(color(message='Installed {}'.format(package_name)))
 
@@ -180,20 +182,19 @@ def install(*args, **kwargs):
                     append_file.write('\n{}'.format(package_name))
 
     elif kwargs.pop('requirements'):
-        target = kwargs.pop('target')
         command = ['pip', 'install', '-r', requirements_file, '-t',
-                   '{}/{}'.format(CWD, target), '--upgrade']
+                   vendor_dir_path, '--upgrade']
         subprocess.call(command)
-        botocore_path = '{}/botocore'.format(target)
-        boto3_path = '{}/boto3'.format(target)
+        botocore_path = '{}/botocore'.format(vendor_dir_path)
+        boto3_path = '{}/boto3'.format(vendor_dir_path)
         if os.path.exists(botocore_path):
             shutil.rmtree(botocore_path)
-            subprocess.call(['rm -rf {}/{}-*'.format(CWD, botocore_path)], shell=True)
-            click.echo(color(message='Removed botocore from {}'.format(target)))
+            subprocess.call(['rm -rf {}-*'.format(botocore_path)], shell=True)
+            click.echo(color(message='Removed botocore from {}'.format(vendor_dir_path)))
         if os.path.exists(boto3_path):
             shutil.rmtree(boto3_path)
-            subprocess.call(['rm -rf {}/{}-*'.format(CWD, boto3_path)], shell=True)
-            click.echo(color(message='Removed boto3 from {}'.format(target)))
+            subprocess.call(['rm -rf {}-*'.format(boto3_path)], shell=True)
+            click.echo(color(message='Removed boto3 from {}'.format(vendor_dir_path)))
 
 
 @click.command()
