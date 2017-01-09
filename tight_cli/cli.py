@@ -348,7 +348,7 @@ def rundb():
 def artifact(*args, **kwargs):
     target = kwargs.pop('target')
     name = get_config(target)['name']
-    zip_name = '{}/builds/{}-artifact-{}.zip'.format(target, name, int(time.time()))
+    zip_name = '{}/builds/{}-artifact-{}'.format(target, name, int(time.time()))
     builds_dir = '{}/builds'.format(target)
     if os.path.exists(builds_dir):
         shutil.rmtree(builds_dir)
@@ -361,18 +361,17 @@ def artifact(*args, **kwargs):
 
     create_zip = ['zip', '-9', zip_name]
     subprocess.call(create_zip)
+    artifact_dir =  '{}/builds/{}-artifact/'.format(target, name)
 
     for dir in directory_list:
-        zip_dir_command = ['zip', zip_name, '-r', dir]
-        cp_dir_command = ['cp', '-R', dir, '{}/builds/{}-artifact/'.format(target, name)]
-        subprocess.call(zip_dir_command)
+        cp_dir_command = ['cp', '-R', dir, artifact_dir]
         subprocess.call(cp_dir_command)
 
-    for file in file_list:
-        zip_file_command = ['zip', zip_name, '-g', file]
-        cp_file_command = ['cp', file, '{}/builds/{}-artifact/'.format(target, name)]
-        subprocess.call(zip_file_command)
+    for file_name in file_list:
+        cp_file_command = ['cp', file_name, artifact_dir]
         subprocess.call(cp_file_command)
+
+    shutil.make_archive(zip_name, 'zip', root_dir=artifact_dir)
 
 
 main.add_command(generate)
