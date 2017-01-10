@@ -4,7 +4,7 @@
 ``tight-cli``
 #############
 
-The ``tight-cli`` package is one of two components, which together form Tight: the toolset that helps you build event driven applications for serverless runtimes. ``tight-cli`` helps you scaffold and maintain Tight apps. This document describes the available commands exposed by ``tight-cli``. For a more thorough discussion of how to use ``tight-cli`` to create and manage yoru application visit the `tutorials <tutorial.html>`_.
+The ``tight-cli`` package is one of two components, which together form Tight: the toolset that helps you build event driven applications for serverless runtimes. ``tight-cli`` helps you scaffold and maintain Tight apps. This document describes the available commands exposed by ``tight-cli``. For a more thorough discussion of how to use ``tight-cli`` to create and manage your application visit the `tutorials <tutorial.html>`_.
 
 Once `installed <installation.html>`_, you can invoke ``tight-cli`` simply by calling ``tight`` from the command line:
 
@@ -279,19 +279,19 @@ As you are developing a Tight app, you will undoubtedly need to install addition
 ``tight dynamo``
 ****************
 
-One of Tight's primary goals is to make it quick and easy to scaffold RESTful APIs. To help achieve this goal, ``tight-cli`` provides a group of commands that helps you manage, run, and test interactions with DynamoDb.
+One of Tight's primary goals is to make it quick and easy to scaffold RESTful APIs. To help achieve this goal, ``tight-cli`` provides a group of commands that helps you manage, run, and test interactions with DynamoDB.
 
 ==========================
 ``tight dynamo installdb``
 ==========================
 
-Run this command to download and expand the latest stable version of DynamoDb. The downloaded tarball will be extracted to the directory ``dynamo_db``.
+Run this command to download and expand the latest stable version of DynamoDB. The downloaded tarball will be extracted to the directory ``dynamo_db``.
 
 ======================
 ``tight dynamo rundb``
 ======================
 
-This command will run the version of DynamoDb which was downloaded via ``tight dynamo installdb``. This command runs dynamo using a shared database file which is written top ``dynamo_db/shared-local-instance.db``.
+This command will run the version of DynamoDB which was downloaded via ``tight dynamo installdb``. This command runs dynamo using a shared database file which is written to ``dynamo_db/shared-local-instance.db``.
 
 *This file is deleted on startup if it exsits.*
 
@@ -319,7 +319,7 @@ As demonstrated in the example above, the command will report on the tables gene
 ``tight dynamo generateschema``
 ===============================
 
-This command will generate CloudFormation compatible DynamoDb resources from `Flywheel models <http://flywheel.readthedocs.io/en/latest/topics/models/basics.html>`_.
+This command will generate CloudFormation compatible DynamoDB resources from `Flywheel models <http://flywheel.readthedocs.io/en/latest/topics/models/basics.html>`_.
 
 Given the following model:
 
