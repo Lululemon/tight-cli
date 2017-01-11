@@ -302,8 +302,9 @@ def installdb():
     subprocess.call(remove_archive)
 
 @click.command()
-def rundb():
-    load_env()
+@click.option('--target', default=CWD)
+def rundb(target):
+    load_env(target)
     os.environ['AWS_REGION'] = 'us-west-2'
     shared_db = './dynamo_db/shared-local-instance.db'
     if os.path.exists(shared_db):
