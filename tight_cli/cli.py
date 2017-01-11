@@ -30,7 +30,7 @@ def get_config(target):
 if CONFIG and 'vendor_dir' in CONFIG:
     VENDOR_DIR = CONFIG['vendor_dir']
 
-VENDOR_REQUIREMENTS_FILE = '{}/requirements-vendor.txt'.format(CWD)
+VENDOR_REQUIREMENTS_FILE = 'requirements-vendor.txt'
 TESTS_DIR = '{}/tests'.format(CWD)
 
 def get_template(template_root, template):
@@ -95,11 +95,8 @@ def function(provider, type, target, name):
         else:
             raise Exception('Cannot create function dir')
 
-    try:
-        with open('{}/__init__.py'.format(function_dir), 'w') as file:
-            file.write('')
-    except Exception as e:
-        raise Exception('Could not wite function __init__.py file')
+    with open('{}/__init__.py'.format(function_dir), 'w') as file:
+        file.write('')
 
     template = get_template(LAMBDA_APP_TEMPLATES, 'lambda_proxy_controller.jinja2')
 
@@ -158,6 +155,10 @@ def pip():
     pass
 
 
+def run_command(command, **kwargs):
+    subprocess.call(command, **kwargs)
+
+
 @click.command()
 @click.argument('package_name', nargs=-1)
 @click.option('--requirements/--no-requirements', default=False)
@@ -169,31 +170,32 @@ def install(*args, **kwargs):
     package_name = kwargs.pop('package_name')[0] if ('package_name' in kwargs) and len(kwargs['package_name']) > 0 else None
     requirements_file = kwargs.pop('requirements_file')
     vendor_dir_path = '{}/{}'.format(target, vendor_dir)
+    requirements_file_path = '{}/{}'.format(target, requirements_file)
     if package_name:
         click.echo(color(message='Installing pacakage {}'.format(vendor_dir_path)))
         command = ['pip', 'install', package_name, '-t', vendor_dir_path, '--upgrade']
-        subprocess.call(command)
+        run_command(command)
         click.echo(color(message='Installed {}'.format(package_name)))
 
-        with open(requirements_file, 'r') as read_file:
+        with open(requirements_file_path, 'r') as read_file:
             packages = read_file.read().split('\n')
             if package_name not in packages:
-                with open(requirements_file, 'a') as append_file:
+                with open(requirements_file_path, 'a') as append_file:
                     append_file.write('\n{}'.format(package_name))
 
     elif kwargs.pop('requirements'):
-        command = ['pip', 'install', '-r', requirements_file, '-t',
+        command = ['pip', 'install', '-r', requirements_file_path, '-t',
                    vendor_dir_path, '--upgrade']
-        subprocess.call(command)
+        run_command(command)
         botocore_path = '{}/botocore'.format(vendor_dir_path)
         boto3_path = '{}/boto3'.format(vendor_dir_path)
         if os.path.exists(botocore_path):
             shutil.rmtree(botocore_path)
-            subprocess.call(['rm -rf {}-*'.format(botocore_path)], shell=True)
+            run_command(['rm -rf {}-*'.format(botocore_path)], shell=True)
             click.echo(color(message='Removed botocore from {}'.format(vendor_dir_path)))
         if os.path.exists(boto3_path):
             shutil.rmtree(boto3_path)
-            subprocess.call(['rm -rf {}-*'.format(boto3_path)], shell=True)
+            run_command(['rm -rf {}-*'.format(boto3_path)], shell=True)
             click.echo(color(message='Removed boto3 from {}'.format(vendor_dir_path)))
 
 

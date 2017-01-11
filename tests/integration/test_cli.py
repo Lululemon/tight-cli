@@ -1,7 +1,10 @@
 import os
 import yaml
+import pytest
+import click
 from click.testing import CliRunner
 from tight_cli import cli
+
 
 def test_generate_app_verify_structure(tmpdir):
     runner = CliRunner()
@@ -39,6 +42,8 @@ def test_generate_function_verify_structure(tmpdir):
     assert os.path.isdir(function_unit_test_root)
     assert os.path.isfile('{}/test_integration_my_controller.py'.format(function_integration_test_root))
     assert os.path.isfile('{}/test_unit_my_controller.py'.format(function_unit_test_root))
+    generate_function_result = runner.invoke(cli.function, ['my_controller', '--target={}'.format(app_root)])
+    assert generate_function_result.output == u'Usage: function [OPTIONS] NAME\n\nError: Invalid value for NAME: Function already exists!\n'
 
 
 def test_generate_model_and_schema(tmpdir):
@@ -74,3 +79,28 @@ def test_generate_artifact(tmpdir):
     assert os.listdir(service_artifact_path) == ['app', 'app_index.py', 'env.dist.yml', 'tight.yml']
     assert os.listdir(app_artifact_path) == ['__init__.py', 'functions', 'lib', 'models', 'serializers', 'vendored']
 
+def test_pip_install_requirements(tmpdir, monkeypatch):
+    runner = CliRunner()
+    app_dir_name = 'my_service'
+    app_dir_path = '{}/{}'.format(tmpdir, app_dir_name)
+    def mock_run_command(*args, **kwargs):
+        pass
+    monkeypatch.setattr(cli, 'run_command', mock_run_command)
+    runner.invoke(cli.app, [app_dir_name, '--target={}'.format(tmpdir)])
+    runner.invoke(cli.install, ['--requirements', '--target={}'.format(app_dir_path)])
+
+
+def test_pip_install_package(tmpdir, monkeypatch):
+    runner = CliRunner()
+    app_dir_name = 'my_service'
+    app_dir_path = '{}/{}'.format(tmpdir, app_dir_name)
+    def mock_run_command(*args, **kwargs):
+        pass
+    monkeypatch.setattr(cli, 'run_command', mock_run_command)
+    app_result = runner.invoke(cli.app, [app_dir_name, '--target={}'.format(tmpdir)])
+    assert app_result.exit_code == 0, 'App created successfully.'
+    install_result = runner.invoke(cli.install, ['PyYAML', '--target={}'.format(app_dir_path)])
+    assert install_result.exit_code == 0, 'Install package command ran successfully.'
+    with open('{}/requirements-vendor.txt'.format(app_dir_path)) as requirements_file:
+        contents = requirements_file.read()
+        assert contents.split('\n')[-1] == 'PyYAML', 'Package added to requirements file.'
