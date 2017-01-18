@@ -307,7 +307,7 @@ def generate_cf_dynamo_schema(target):
 @click.command()
 def installdb():
     install_path = '{}/dynamo_db'.format(CWD)
-    command = ['curl', '-LO', 'http://dynamodb-local.s3-website-us-west-2.amazonaws.com/dynamodb_local_latest.tar.gz']
+    command = ['curl', '-LO', 'https://s3-us-west-2.amazonaws.com/dynamodb-local/dynamodb_local_latest.tar.gz']
     subprocess.call(command)
     if os.path.exists(install_path):
         shutil.rmtree(install_path)
