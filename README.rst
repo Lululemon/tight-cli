@@ -6,11 +6,11 @@ tight-cli
     :target: http://tight-cli.readthedocs.io/en/latest/?badge=latest
     :alt: Documentation Status
 
-.. image:: https://travis-ci.org/lululemon/tight-cli.svg?branch=master
-    :target: https://travis-ci.org/lululemon/tight-cli
+.. image:: https://travis-ci.org/Lululemon/tight-cli.svg?branch=master
+    :target: https://travis-ci.org/Lululemon/tight-cli
 
-.. image:: https://codecov.io/gh/lululemon/tight-cli/branch/master/graph/badge.svg
-  :target: https://codecov.io/gh/lululemon/tight-cli
+.. image:: https://codecov.io/gh/Lululemon/tight-cli/branch/master/graph/badge.svg
+  :target: https://codecov.io/gh/Lululemon/tight-cli
 
 ----
 
