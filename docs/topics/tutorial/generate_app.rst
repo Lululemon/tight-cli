@@ -130,7 +130,7 @@ Imagine creating an ``Account`` model:
 app/models/__init__.py
 ----------------------
 
-Unlik the other directories that get created inside of ``app``, the ``__init__.py`` file inside of ``models`` is not empty. This file will loop through the files in the directory and automatically import the models that are defined. So long as the convention described above is followed, you will be able to succinctly import models into function modules.
+Unlike the other directories that get created inside of ``app``, the ``__init__.py`` file inside of ``models`` is not empty. This file will loop through the files in the directory and automatically import the models that are defined. So long as the convention described above is followed, you will be able to succinctly import models into function modules.
 
 The ``Acccount`` model defined above would be imported like so:
 
@@ -143,7 +143,7 @@ The ``Acccount`` model defined above would be imported like so:
 app/serializers/
 ----------------
 
-Tight encourages you maintain serialization logic separately from model modules. As such, Tight provides a location where serializers can be kept.
+Tight encourages you to maintain serialization logic separately from model modules. As such, Tight provides a location where serializers can be kept.
 
 -------------
 app/vendored/
@@ -236,7 +236,7 @@ tight.yml
 Install Dependencies
 ********************
 
-Now that are application structure has been scaffolded, it's time to install our dependencies. First we'll install our virtual environment depedencies and then we'll install our application specific dependencies.
+Now that our application structure has been scaffolded, it's time to install our dependencies. First we'll install our virtual environment depedencies and then we'll install our application specific dependencies.
 
 ************************
 Environment Dependencies
