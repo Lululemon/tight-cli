@@ -12,7 +12,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import click, os, sys, shutil, subprocess, yaml, glob, time
+import click
+import os
+import sys
+import shutil
+import subprocess
+import yaml
+import glob
+import time
+import re
 from os.path import basename, isfile
 from inflector import Inflector, English
 from colorama import init
@@ -31,6 +39,19 @@ CWD = os.getcwd()
 CONFIG = {}
 VENDOR_DIR = None
 ENV_DIST = '{}/env.dist.yml'.format(CWD)
+LICENSE_TEXT = """# Copyright (c) 2017 lululemon athletica Canada inc.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License."""
 
 def get_config(target):
     try:
@@ -141,6 +162,7 @@ def function(provider, type, target, name):
 
     command = ['py.test', '{}/tests'.format(target)]
     subprocess.call(command)
+    remove_license_text(target)
     click.echo(color(message='Successfully generated function and tests!'))
 
 
@@ -162,6 +184,8 @@ def generate_app_aws_lambda(name, target):
 
     with open('{}/__init__.py'.format(vendordir), 'w') as init_file:
         init_file.write('')
+
+    remove_license_text('{}/{}'.format(target, name))
 
 
 @click.group()
@@ -239,6 +263,8 @@ def model(target, **kwargs):
     template = get_template(LAMBDA_APP_TEMPLATES, 'flywheel_model.jinja2')
     with open('{}/{}.py'.format(target, class_name), 'w') as file:
         file.write(template.render(class_name=class_name, table_name=table_name))
+
+    remove_license_text(target)
 
 
 def load_env(target):
@@ -389,6 +415,28 @@ def artifact(*args, **kwargs):
         subprocess.call(cp_file_command)
 
     shutil.make_archive(zip_name, 'zip', root_dir=artifact_dir)
+
+def remove_license_text(directory):
+    """
+    Walk the directory path provided and remove all instances of the license.
+
+    :param directory:
+    :return:
+    """
+    for dirName, subdirList, fileList in os.walk(directory):
+        for fname in fileList:
+            with open('{}/{}'.format(dirName, fname), 'r') as file_to_test:
+                contents = file_to_test.read()
+                pattern = re.compile(re.escape(LICENSE_TEXT))
+                matches = re.search(pattern, contents)
+                if matches is not None:
+                    new_contents = re.sub(pattern, '', contents)
+                    new_contents = re.sub(r'^\n*', '', new_contents)
+
+            if matches is not None:
+                with open('{}/{}'.format(dirName, fname), 'w') as file_to_test:
+                    file_to_test.write(new_contents)
+
 
 
 main.add_command(generate)

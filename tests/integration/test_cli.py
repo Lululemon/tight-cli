@@ -16,6 +16,7 @@ import os
 import yaml
 import pytest
 import click
+import re
 from click.testing import CliRunner
 from tight_cli import cli
 
@@ -91,7 +92,7 @@ def test_generate_artifact(tmpdir):
     assert os.path.isdir(service_artifact_path), './builds/artifact dir created'
     assert os.path.isdir(app_artifact_path), './builds/artifact/app dir copied'
     assert os.listdir(service_artifact_path) == ['app', 'app_index.py', 'env.dist.yml', 'tight.yml']
-    assert os.listdir(app_artifact_path) == ['__init__.py', 'functions', 'lib', 'models', 'serializers', 'vendored']
+    assert os.listdir(app_artifact_path).sort() == ['__init__.py', 'functions', 'lib', 'models', 'serializers', 'vendored'].sort()
 
 def test_pip_install_requirements(tmpdir, monkeypatch):
     runner = CliRunner()
@@ -118,3 +119,23 @@ def test_pip_install_package(tmpdir, monkeypatch):
     with open('{}/requirements-vendor.txt'.format(app_dir_path)) as requirements_file:
         contents = requirements_file.read()
         assert contents.split('\n')[-1] == 'PyYAML', 'Package added to requirements file.'
+
+def test_remove_license_header_text(tmpdir):
+    runner = CliRunner()
+    app_dir_name = 'my_service'
+    app_dir_path = '{}/{}'.format(tmpdir, app_dir_name)
+    runner.invoke(cli.app, [app_dir_name, '--target={}'.format(tmpdir)])
+    def walk_and_test(path):
+        for dirName, subdirList, fileList in os.walk(path):
+            for fname in fileList:
+                with open('{}/{}'.format(dirName, fname), 'r') as file_to_test:
+                    contents = file_to_test.read()
+                    pattern = re.compile(re.escape(cli.LICENSE_TEXT))
+                    assert re.search(pattern, contents) == None, 'No file should have license header text'
+    walk_and_test(app_dir_path)
+    target = '{}/{}/app/models'.format(tmpdir, app_dir_name)
+    runner.invoke(cli.model, ['my_model', '--target={}'.format(target)])
+    walk_and_test(app_dir_path)
+    generate_function_result = runner.invoke(cli.function, ['my_controller', '--target={}'.format(app_dir_path)])
+    assert generate_function_result.exit_code == 0
+    walk_and_test(app_dir_path)
