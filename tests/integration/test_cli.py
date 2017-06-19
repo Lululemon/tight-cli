@@ -14,8 +14,6 @@
 
 import os
 import yaml
-import pytest
-import click
 from click.testing import CliRunner
 from tight_cli import cli
 
@@ -34,6 +32,7 @@ def test_generate_app_verify_structure(tmpdir):
     for file in files:
         assert os.path.isfile('{}/{}'.format(app_root, file)), '{} file exists'.format(file)
 
+
 def test_generate_function_verify_structure(tmpdir):
     runner = CliRunner()
     """ generate app """
@@ -51,8 +50,7 @@ def test_generate_function_verify_structure(tmpdir):
     function_integration_test_root = '{}/tests/functions/integration/my_controller'.format(app_root)
     function_unit_test_root = '{}/tests/functions/unit/my_controller'.format(app_root)
     assert os.path.isdir(function_integration_test_root), 'Integration test directory exists'
-    assert os.path.isdir('{}/placebos'.format(function_integration_test_root)), 'Integration test expectations directory exists'
-    assert os.path.isdir('{}/expectations'.format(function_integration_test_root)), 'Integration test placebos directory exists'
+    assert os.path.isdir('{}/expectations'.format(function_integration_test_root)), 'Integration test expectations directory exists'
     assert os.path.isdir(function_unit_test_root)
     assert os.path.isfile('{}/test_integration_my_controller.py'.format(function_integration_test_root))
     assert os.path.isfile('{}/test_unit_my_controller.py'.format(function_unit_test_root))
@@ -91,12 +89,14 @@ def test_generate_artifact(tmpdir):
     assert os.path.isdir(service_artifact_path), './builds/artifact dir created'
     assert os.path.isdir(app_artifact_path), './builds/artifact/app dir copied'
     assert os.listdir(service_artifact_path) == ['app', 'app_index.py', 'env.dist.yml', 'tight.yml']
-    assert os.listdir(app_artifact_path) == ['__init__.py', 'functions', 'lib', 'models', 'serializers', 'vendored']
+    assert os.listdir(app_artifact_path).sort() == ['__init__.py', 'functions', 'lib', 'models', 'serializers', 'vendored'].sort()
+
 
 def test_pip_install_requirements(tmpdir, monkeypatch):
     runner = CliRunner()
     app_dir_name = 'my_service'
     app_dir_path = '{}/{}'.format(tmpdir, app_dir_name)
+
     def mock_run_command(*args, **kwargs):
         pass
     monkeypatch.setattr(cli, 'run_command', mock_run_command)
@@ -108,6 +108,7 @@ def test_pip_install_package(tmpdir, monkeypatch):
     runner = CliRunner()
     app_dir_name = 'my_service'
     app_dir_path = '{}/{}'.format(tmpdir, app_dir_name)
+
     def mock_run_command(*args, **kwargs):
         pass
     monkeypatch.setattr(cli, 'run_command', mock_run_command)

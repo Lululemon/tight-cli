@@ -12,8 +12,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import click, os, sys, shutil, subprocess, yaml, glob, time
+import os
+import sys
+import shutil
+import subprocess
+import time
+import importlib
+import click
 from os.path import basename, isfile
+import glob
+
+import yaml
 from inflector import Inflector, English
 from colorama import init
 from termcolor import colored
@@ -32,7 +41,11 @@ CONFIG = {}
 VENDOR_DIR = None
 ENV_DIST = '{}/env.dist.yml'.format(CWD)
 
+"""
+Retrieves and loads local project config. E.g. /path/to/project/tight.yml
+"""
 def get_config(target):
+    config = {}
     try:
         with open('{}/tight.yml'.format(target)) as tight_config:
             config = yaml.load(tight_config)
@@ -41,19 +54,32 @@ def get_config(target):
 
     return config
 
+
 if CONFIG and 'vendor_dir' in CONFIG:
     VENDOR_DIR = CONFIG['vendor_dir']
 
 VENDOR_REQUIREMENTS_FILE = 'requirements-vendor.txt'
 TESTS_DIR = '{}/tests'.format(CWD)
 
+
 def get_template(template_root, template):
+    """
+    Helper function for retrieving a jinja2 template.
+    :param template_root:
+    :param template:
+    :return:
+    """
     with open('{}/{}'.format(template_root, template), 'r') as handler_template:
         template = Template(handler_template.read())
     return template
 
 
 def color(message):
+    """
+    Colorize output.
+    :param message:
+    :return:
+    """
     return colored(message, 'yellow', 'on_grey')
 
 
@@ -100,6 +126,38 @@ def app(provider, type, target, name):
 @click.option('--target', default=CWD, help='Location where app will be created.')
 @click.argument('name')
 def function(provider, type, target, name):
+    """
+    Generate a "function" within a project. Common usage:
+
+    tight generate function your_function_name
+
+    This will scaffold out all the individual files / directories needed to start
+    developing function code and testing it!
+
+    Example:
+
+    `tight generate function render_controller`
+
+    app/
+        functions/
+            render_controller/
+                __init__.py
+                handler.py
+    tests/
+        functions/
+            integration/
+                render_controller/
+                    test_integration_render_controller.py
+            unit/
+                render_controller/
+                    test_unit_render_controller.py
+
+    :param provider:
+    :param type:
+    :param target:
+    :param name:
+    :return:
+    """
     function_dir = '{}/app/functions/{}'.format(target, name)
     try:
         os.mkdir(function_dir)
@@ -119,12 +177,10 @@ def function(provider, type, target, name):
 
     integration_test_dir = '{}/tests/functions/integration/{}'.format(target, name)
     integration_test_expectations_dir = '{}/tests/functions/integration/{}/expectations'.format(target, name)
-    integration_test_placebos_dir = '{}/tests/functions/integration/{}/placebos'.format(target, name)
     unit_test_dir = '{}/tests/functions/unit/{}'.format(target, name)
 
     os.mkdir(integration_test_dir)
     os.mkdir(integration_test_expectations_dir)
-    os.mkdir(integration_test_placebos_dir)
     os.mkdir(unit_test_dir)
 
     with open('{}/test_integration_{}.py'.format(integration_test_dir, name), 'w') as file:
@@ -145,6 +201,13 @@ def function(provider, type, target, name):
 
 
 def generate_app_aws_lambda(name, target):
+    """
+    Scaffolds basic structure for an aws app.
+
+    :param name:
+    :param target:
+    :return:
+    """
     HERE = os.path.dirname(os.path.realpath(__file__))
     shutil.copytree('{}/blueprints/providers/aws/lambda_app/starter'.format(HERE), '{}/{}'.format(target, name))
     app_name = INFLECTOR.underscore(name).replace('_', '-')
@@ -179,6 +242,21 @@ def run_command(command, **kwargs):
 @click.option('--requirements-file', default=VENDOR_REQUIREMENTS_FILE, help='Requirements file location', type=click.Choice([VENDOR_REQUIREMENTS_FILE]))
 @click.option('--target', default=CWD, help='Target directory.')
 def install(*args, **kwargs):
+    """
+    Install pip dependencies in a lambda compatible manner.
+
+    Install a single package to the vendored dir:
+
+    tight pip install some_package
+
+    Install packages from ./requirements-vendor.txt into app/vendored:
+
+    tight pip install --requirements
+
+    :param args:
+    :param kwargs:
+    :return:
+    """
     target = kwargs.pop('target')
     vendor_dir = get_config(target)['vendor_dir']
     package_name = kwargs.pop('package_name')[0] if ('package_name' in kwargs) and len(kwargs['package_name']) > 0 else None
@@ -216,22 +294,37 @@ def install(*args, **kwargs):
 @click.command()
 @click.option('--target', default=CWD)
 def env(*args, **kwargs):
+    """
+    Generates a locally editable env.yml file from ./env.dist.yml
+
+    :param args:
+    :param kwargs:
+    :return:
+    """
     target = kwargs.pop('target')
     env_dist_path = '{}/env.dist.yml'.format(target)
     dist_env_vars = yaml.load(open(env_dist_path))
-    for k, v in dist_env_vars.iteritems():
+    for k, v in dist_env_vars.items():
         if os.environ.get(k):
             dist_env_vars[k] = os.environ[k]
-    stream = file('{}/env.yml'.format(target), 'w')
-    dist_env_vars['NAME'] = get_config(target)['name'].replace('_', '-')
-    yaml.safe_dump(dist_env_vars, stream)
-    print yaml.dump(dist_env_vars)
+    with open('{}/env.yml'.format(target), 'w') as config_file:
+        dist_env_vars['NAME'] = get_config(target)['name'].replace('_', '-')
+        values = yaml.safe_dump(dist_env_vars)
+        config_file.write(values)
+        print(values)
 
 
 @click.command()
 @click.option('--target', default='{}/app/models'.format(CWD), help='Location to save model.')
 @click.argument('name')
 def model(target, **kwargs):
+    """
+    Generate a Flywheel / DynamoDB model.
+
+    :param target:
+    :param kwargs:
+    :return:
+    """
     model_name = kwargs.pop('name')
     class_name = INFLECTOR.camelize(model_name)
     table_name = INFLECTOR.tableize(class_name)
@@ -246,19 +339,29 @@ def load_env(target):
     if not env_vars:
         raise Exception('Could not load env.yml. Have you run `tight generate env`?')
 
-    for k, v in env_vars.iteritems():
+    for k, v in env_vars.items():
         os.environ[k] = str(v)
+
 
 @click.group()
 def dynamo():
     pass
 
+
 @click.command()
 @click.option('--target', default=CWD)
 def generateschema(*args, **kwargs):
+    """
+    Inspect models/ directory and derive DynamoDB schema definitions.
+
+    :param args:
+    :param kwargs:
+    :return:
+    """
     target = kwargs.pop('target')
     load_env(target)
     generate_cf_dynamo_schema(target)
+
 
 def write_schema_to_yaml(target, **kwargs):
     properties = kwargs.copy()
@@ -268,12 +371,13 @@ def write_schema_to_yaml(target, **kwargs):
         'Type': 'AWS::DynamoDB::Table',
         'Properties': properties
     }
-    stream = file('{}/schemas/dynamo/{}.yml'
-                  .format(target, table_name), 'w')
-    yaml.safe_dump(table, stream)
+    with open('{}/schemas/dynamo/{}.yml' .format(target, table_name), 'w') as model_file:
+        model_file.write(yaml.safe_dump(table))
+
 
 def generate_cf_dynamo_schema(target):
     dynamo_connection = DynamoDBConnection()
+
     class FakeClient(object):
         def create_table(self, *args, **kwargs):
             write_schema_to_yaml(target, **kwargs)
@@ -285,8 +389,10 @@ def generate_cf_dynamo_schema(target):
     class FakeDynamo(object):
         def list_tables(self):
             return []
+
         def create_table(self, *args):
             result = dynamo_connection.create_table(*args)
+
         def describe_table(self, *args):
             StatusStruct = namedtuple('Status', 'status')
             return StatusStruct(status='ACTIVE')
@@ -297,15 +403,21 @@ def generate_cf_dynamo_schema(target):
 
     sys.path = ['{}/app/models'.format(target)] + sys.path
     modelModules = glob.glob('{}/app/models'.format(target) + '/*.py')
-    models = [ basename(f)[:-3] for f in modelModules if isfile(f)]
+    models = [basename(f)[:-3] for f in modelModules if isfile(f)]
     for modelName in models:
         if modelName != '__init__':
-            engine.register(getattr(__import__(modelName), modelName))
+            engine.register(getattr(importlib.__import__(modelName), modelName))
 
     engine.create_schema()
 
+
 @click.command()
 def installdb():
+    """
+    Install a local copy of DynamoDB
+
+    :return:
+    """
     install_path = '{}/dynamo_db'.format(CWD)
     command = ['curl', '-LO', 'https://s3-us-west-2.amazonaws.com/dynamodb-local/dynamodb_local_latest.tar.gz']
     subprocess.call(command)
@@ -317,9 +429,16 @@ def installdb():
     remove_archive = ['rm', '{}/dynamodb_local_latest.tar.gz'.format(CWD)]
     subprocess.call(remove_archive)
 
+
 @click.command()
 @click.option('--target', default=CWD)
 def rundb(target):
+    """
+    Start running a local DynamoDB instance.
+
+    :param target:
+    :return:
+    """
     load_env(target)
     os.environ['AWS_REGION'] = 'us-west-2'
     shared_db = './dynamo_db/shared-local-instance.db'
@@ -349,7 +468,7 @@ def rundb(target):
                 engine.register(getattr(__import__(modelName), modelName))
         engine.create_schema()
         tables = [table for table in engine.dynamo.list_tables()]
-        print "This engine has the following tables " + str(tables)
+        print("This engine has the following tables " + str(tables))
         for table in tables:
             engine.dynamo.describe_table(table)
     except Exception as e:
@@ -363,6 +482,13 @@ def rundb(target):
 @click.command()
 @click.option('--target', default=CWD)
 def artifact(*args, **kwargs):
+    """
+    Generate an artifact for the app. Will be located at ./build
+
+    :param args:
+    :param kwargs:
+    :return:
+    """
     target = kwargs.pop('target')
     name = get_config(target)['name']
     zip_name = '{}/builds/{}-artifact-{}'.format(target, name, int(time.time()))
@@ -378,7 +504,7 @@ def artifact(*args, **kwargs):
 
     create_zip = ['zip', '-9', zip_name]
     subprocess.call(create_zip)
-    artifact_dir =  '{}/builds/{}-artifact/'.format(target, name)
+    artifact_dir = '{}/builds/{}-artifact/'.format(target, name)
 
     for dir in directory_list:
         cp_dir_command = ['cp', '-R', dir, artifact_dir]

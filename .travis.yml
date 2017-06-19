@@ -16,7 +16,7 @@ language: python
 sudo: false
 matrix:
   include:
-  - python: "2.7"
+  - python: "3.6"
 install:
   - pip install -e .
   - pip install -r requirements-dev.txt
