@@ -25,7 +25,7 @@ class {{ class_name }}(Model):
         }
     }
 
-    id = Field(type=unicode, hash_key=True)
+    id = Field(type=str, hash_key=True)
 
     # Constructor
     def __init__(self, id):
