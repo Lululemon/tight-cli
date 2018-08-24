@@ -18,6 +18,10 @@ from click.testing import CliRunner
 from tight_cli import cli
 
 
+def test_new(tmpdir):
+    runner = CliRunner()
+    result = runner.invoke(cli.app, ['my_service', '--target={}'.format(tmpdir)])
+
 def test_generate_app_verify_structure(tmpdir):
     runner = CliRunner()
     result = runner.invoke(cli.app, ['my_service', '--target={}'.format(tmpdir)])
@@ -37,7 +41,6 @@ def test_generate_function_verify_structure(tmpdir):
     runner = CliRunner()
     """ generate app """
     runner.invoke(cli.app, ['my_service', '--target={}'.format(tmpdir)])
-    app_root = '{}/{}'.format(tmpdir, 'my_service')
     """ generate function """
     generate_function_result = runner.invoke(cli.function, ['my_controller', '--target={}'.format(app_root)])
     assert generate_function_result.exit_code == 0

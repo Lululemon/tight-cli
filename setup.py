@@ -21,7 +21,7 @@ with open('README.rst') as readme_file:
 
 
 install_requires = [
-    'click',
+    'Click',
     'PyYAML',
     'colorama',
     'termcolor',
@@ -49,7 +49,7 @@ setup(
     keywords='tight',
     entry_points={
         'console_scripts': [
-            'tight = tight_cli.cli:main',
+            'tight = tight_cli.cli:cli',
         ]
     },
     classifiers=[
