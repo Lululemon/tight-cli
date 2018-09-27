@@ -88,12 +88,12 @@ And as mentioned the ``tight-cli`` command line tool will scaffold services, fun
 Motivation & Philosophy
 ***********************
 
-Tight is inspired by tools and frameworks such as Sinatra, Ember, Flask, Chalice, and Serverless – to name just a few. Tight aspires to help you and your team build servereless applications in a repeatable and conventional manner. To achieve this goal Tight provides two distinct packages: `tight <https://github.com/michaelorionmcmanus/tight>`_ and `tight-cli <https://github.com/michaelorionmcmanus/tight-cli>`_.
+Tight is inspired by tools and frameworks such as Sinatra, Ember, Flask, Chalice, and Serverless – to name just a few. Tight aspires to help you and your team build servereless applications in a repeatable and conventional manner. To achieve this goal Tight provides two distinct packages: `tight <https://github.com/lululemon/tight>`_ and `tight-cli <https://github.com/lululemon/tight-cli>`_.
 
 
-The core package, `tight <https://github.com/michaelorionmcmanus/tight>`_, provides modules that map request events to REST style resource handlers – this makes it easy to author declarative resource controllers that group method handlers logically and legibly. Additional modules help you interact with external services, like DynamoDb, in an intuitive and fluent manner. Finally, a suite of test helpers makes it easy to record and simulate HTTP requests and AWS SDK calls.
+The core package, `tight <https://github.com/lululemon/tight>`_, provides modules that map request events to REST style resource handlers – this makes it easy to author declarative resource controllers that group method handlers logically and legibly. Additional modules help you interact with external services, like DynamoDb, in an intuitive and fluent manner. Finally, a suite of test helpers makes it easy to record and simulate HTTP requests and AWS SDK calls.
 
-The Tight command line tool, `tight_cli <https://github.com/michaelorionmcmanus/tight-cli>`_, helps you quickly scaffold and test Tight applications and functions. The tutorials walk through every ``tight-cli`` command and will demonstrate how to:
+The Tight command line tool, `tight_cli <https://github.com/lululemon/tight-cli>`_, helps you quickly scaffold and test Tight applications and functions. The tutorials walk through every ``tight-cli`` command and will demonstrate how to:
 
  * Generate application directories and files
  * Generate functions and tests

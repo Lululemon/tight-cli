@@ -13,7 +13,7 @@ Install ``tight-cli`` via, Git.
 
 .. sourcecode:: bash
 
-    $ pip install git+git://github.com/michaelorionmcmanus/tight-cli.git#egg=tight-cli
+    $ pip install git+git://github.com/lululemon/tight-cli.git#egg=tight-cli
 
 
 Generate a Tight App

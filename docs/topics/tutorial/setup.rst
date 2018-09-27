@@ -30,6 +30,6 @@ Currently, the ``tight-cli`` package is installed via git. Once you are in your 
 
 .. sourcecode:: bash
 
-    $ pip install git+git://github.com/michaelorionmcmanus/tight.git#egg=tight
+    $ pip install git+git://github.com/lululemon/tight-cli.git#egg=tight-cli
 
 You are now ready to start building a Tight app!
