@@ -4,4 +4,4 @@ sphinx_rtd_theme
 pytest
 pytest-cov
 pyyaml
-git+git://github.com/michaelorionmcmanus/tight.git#egg=tight
+git+git://github.com/lululemon/tight.git#egg=tight
