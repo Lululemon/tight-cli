@@ -1,0 +1,85 @@
+get:
+  tags:
+  - "{{ name }}"
+  responses:
+    200:
+      description: "service is alive"
+      schema:
+        $ref: "#/definitions/{{ camel_case_name }}"
+  x-amazon-apigateway-integration:
+    uri:
+      Fn::Join:
+      - ''
+      - - Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${AWS::Region}:${AWS::AccountId}
+        - :function:${stageVariables.{{ camel_case_name }}/invocations
+    passthroughBehavior: "when_no_match"
+    httpMethod: "POST"
+    type: "aws_proxy"
+post:
+  tags:
+  - "{{ name }}"
+  responses:
+    200:
+      description: "service is alive"
+      schema:
+        $ref: "#/definitions/{{ camel_case_name }}"
+  x-amazon-apigateway-integration:
+    uri:
+      Fn::Join:
+      - ''
+      - - Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${AWS::Region}:${AWS::AccountId}
+        - :function:${stageVariables.{{ camel_case_name }}/invocations
+    passthroughBehavior: "when_no_match"
+    httpMethod: "POST"
+    type: "aws_proxy"
+patch:
+  tags:
+  - "{{ name }}"
+  responses:
+    200:
+      description: "service is alive"
+      schema:
+        $ref: "#/definitions/{{ camel_case_name }}"
+  x-amazon-apigateway-integration:
+    uri:
+      Fn::Join:
+      - ''
+      - - Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${AWS::Region}:${AWS::AccountId}
+        - :function:${stageVariables.{{ camel_case_name }}/invocations
+    passthroughBehavior: "when_no_match"
+    httpMethod: "POST"
+    type: "aws_proxy"
+put:
+  tags:
+  - "{{ name }}"
+  responses:
+    200:
+      description: "service is alive"
+      schema:
+        $ref: "#/definitions/{{ camel_case_name }}"
+  x-amazon-apigateway-integration:
+    uri:
+      Fn::Join:
+      - ''
+      - - Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${AWS::Region}:${AWS::AccountId}
+        - :function:${stageVariables.{{ camel_case_name }}/invocations
+    passthroughBehavior: "when_no_match"
+    httpMethod: "POST"
+    type: "aws_proxy"
+delete:
+  tags:
+  - "{{ name }}"
+  responses:
+    200:
+      description: "service is alive"
+      schema:
+        $ref: "#/definitions/{{ camel_case_name }}"
+  x-amazon-apigateway-integration:
+    uri:
+      Fn::Join:
+      - ''
+      - - Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${AWS::Region}:${AWS::AccountId}
+        - :function:${stageVariables.{{ camel_case_name }}/invocations
+    passthroughBehavior: "when_no_match"
+    httpMethod: "POST"
+    type: "aws_proxy"

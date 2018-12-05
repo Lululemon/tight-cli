@@ -12,6 +12,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-body: '{"alive":true}'
-headers: {Access-Control-Allow-Origin: '*'}
-statusCode: 200
+import tight.providers.aws.controllers.lambda_proxy_event as lambda_proxy
+
+from app.models.is_alive import IsAliveSchema
+
+
+@lambda_proxy.get
+def get_handler(*args, **kwargs):
+    schema = IsAliveSchema()
+    body, errors = schema.dump({})
+    return {
+        'statusCode': 200,
+        'body': body
+    }

@@ -1,0 +1,19 @@
+swagger: "2.0"
+info:
+  description: "This is a sample server for a lululemon micro-service.  You can find out more about     Swagger at [github.com/lululemon](http://github.com/lululemon.)"
+  version: "1.0.0"
+  title: "lululemon micro-service"
+  contact:
+    email: "wae@lululemon.com"
+host: "api.lululemon.com"
+basePath: "/1.0.0"
+tags:
+- name: "alive"
+  description: "Is the service alive?"
+  externalDocs:
+    description: "Documentation"
+    url: "https://www.github.com/lululemon"
+paths:
+  $ref: ./docs/paths/index.yaml
+definitions:
+  $ref: ./docs/definitions/index.yaml

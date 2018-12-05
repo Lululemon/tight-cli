@@ -12,18 +12,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# content of conftest.py
-import pytest, os, sys, importlib, yaml, json, boto3
+import os, json
 here = os.path.dirname(os.path.realpath(__file__))
-sys.path = [os.path.join(here, "app/vendored")] + sys.path
+from tight.core.test_helpers import expected_response_body
 
-from tight.core.test_helpers import *
-
-def pytest_sessionstart():
-    os.environ['AWS_REGION'] = 'us-west-2'
-    os.environ['NAME'] = '{{ name }}'
-    os.environ['STAGE'] = 'dev'
-    os.environ['PLAYBACK'] = 'True'
-    if 'CI' not in os.environ:
-        os.environ['CI'] = 'False'
-        os.environ['USE_LOCAL_DB'] = 'True'
+def test_get_method(app, dynamo_db_session):
+    context = {}
+    event = {
+        'httpMethod': 'GET'
+    }
+    actual_response = app.is_alive_function(event, context)
+    actual_response_body = json.loads(actual_response['body'])
+    expected_response = expected_response_body(here, 'expectations/test_get_method.yml', actual_response)
+    assert actual_response['statusCode'] == 200, 'The response statusCode is 200'
+    assert actual_response_body == expected_response, 'Expected response body matches the actual response body.'

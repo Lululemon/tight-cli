@@ -1,1 +1,3 @@
 git+git://github.com/lululemon/tight.git#egg=tight
+marshmallow
+apispec

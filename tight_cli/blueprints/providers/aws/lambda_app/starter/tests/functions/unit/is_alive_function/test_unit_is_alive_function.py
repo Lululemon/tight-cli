@@ -12,6 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-body: '{"alive":true}'
-headers: {Access-Control-Allow-Origin: '*'}
-statusCode: 200
+def test_no_boom():
+    module = __import__('app.functions.is_alive_function.handler')
+    assert module

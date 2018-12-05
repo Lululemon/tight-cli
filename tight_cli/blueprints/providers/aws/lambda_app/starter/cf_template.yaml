@@ -1,0 +1,25 @@
+xAWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: Simple API Endpoint configured using Swagger specified inline and backed by a Lambda function
+Resources:
+  MyApi:
+    Type: AWS::Serverless::Api
+    Properties:
+      StageName: prod
+      DefinitionBody:
+        $ref: ./definition.yaml
+  IsAliveFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: "Is Alive Function"
+      Handler: app_index.is_alive_function
+      Runtime: python3.6
+      Environment:
+        Variables:
+          PARAM1: VALUE
+      Events:
+        is_alive_function:
+          Type: Api
+          Properties:
+            Path: /alive
+            Method: get

@@ -28,7 +28,7 @@ install_requires = [
     'jinja2',
     'inflector',
     'flywheel',
-    'dynamo3'
+    'dynamo3', 'marshmallow'
 ]
 
 

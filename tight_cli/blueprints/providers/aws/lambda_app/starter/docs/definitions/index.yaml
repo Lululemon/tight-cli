@@ -1,0 +1,2 @@
+IsAlive:
+  $ref: ./is_alive.yaml

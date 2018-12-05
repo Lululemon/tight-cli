@@ -11,36 +11,66 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+from app.models.{{ name }} import {{ camel_case_name }}Schema
 
-from tight.providers.aws.clients import dynamo_db
 import tight.providers.aws.controllers.lambda_proxy_event as lambda_proxy
-db = dynamo_db.connect()
+
 
 @lambda_proxy.get
 def get_handler(*args, **kwargs):
+    schema = {{ camel_case_name }}Schema()
+    data, errors = schema.dump({})
+
     return {
         'statusCode': 200,
-        'body': {
-            'hello': 'world'
-        }
+        'body': data
     }
+
 
 @lambda_proxy.post
 def post_handler(*args, **kwargs):
-    pass
+    event = args[1]
+    # context = args[2]
+
+    schema = {{ camel_case_name }}Schema()
+    data, errors = schema.dump(event['body'])
+
+    return {
+        'statusCode': 201,
+        'body': data
+    }
+
 
 @lambda_proxy.put
 def put_handler(*args, **kwargs):
-    pass
+    event = args[1]
+    # context = args[2]
+
+    schema = {{ camel_case_name }}Schema()
+    data, errors = schema.dump(event['body'])
+
+    return {
+        'statusCode': 200,
+        'body': data
+    }
+
 
 @lambda_proxy.patch
 def patch_handler(*args, **kwargs):
-    pass
+    event = args[1]
+    # context = args[2]
 
-@lambda_proxy.options
-def options_handler(*args, **kwargs):
-    pass
+    schema = {{ camel_case_name }}Schema()
+    data, errors = schema.dump(event['body'])
+
+    return {
+        'statusCode': 200,
+        'body': data
+    }
+
 
 @lambda_proxy.delete
 def delete_handler(*args, **kwargs):
-    pass
+    return {
+        'statusCode': 200,
+    }

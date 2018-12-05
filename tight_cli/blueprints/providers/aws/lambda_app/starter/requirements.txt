@@ -3,3 +3,5 @@ PyYAML
 pytest
 boto3
 botocore
+marshmallow
+apispec

@@ -1,0 +1,4 @@
+properties:
+  alive:
+    type: boolean
+type: object

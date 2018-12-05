@@ -13,6 +13,7 @@
 # limitations under the License.
 
 import os
+import re
 import sys
 import shutil
 import subprocess
@@ -44,6 +45,8 @@ ENV_DIST = '{}/env.dist.yml'.format(CWD)
 """
 Retrieves and loads local project config. E.g. /path/to/project/tight.yml
 """
+
+
 def get_config(target):
     config = {}
     try:
@@ -81,6 +84,11 @@ def color(message):
     :return:
     """
     return colored(message, 'yellow', 'on_grey')
+
+
+def to_camel_case(snake_str):
+    components = snake_str.split('_')
+    return ''.join(x.title() for x in components)
 
 
 @click.group()
@@ -143,6 +151,8 @@ def function(provider, type, target, name):
             render_controller/
                 __init__.py
                 handler.py
+        models/
+            render_controller.py -> RenderControllerSchema
     tests/
         functions/
             integration/
@@ -151,6 +161,10 @@ def function(provider, type, target, name):
             unit/
                 render_controller/
                     test_unit_render_controller.py
+    docs/
+        definitions/
+            RenderController.yaml
+
 
     :param provider:
     :param type:
@@ -158,7 +172,21 @@ def function(provider, type, target, name):
     :param name:
     :return:
     """
+
+    integration_test_expectations_dir = '{}/tests/functions/integration/{}/expectations'.format(target, name)
+    integration_test_dir = '{}/tests/functions/integration/{}'.format(target, name)
+    unit_test_dir = '{}/tests/functions/unit/{}'.format(target, name)
     function_dir = '{}/app/functions/{}'.format(target, name)
+    models_dir = '{}/app/models'.format(target)
+    definitions_dir = '{}/docs/definitions'.format(target)
+    paths_dir = '{}/docs/paths'.format(target)
+
+    os.mkdir(integration_test_dir)
+    os.mkdir(integration_test_expectations_dir)
+    os.mkdir(unit_test_dir)
+
+    camel_case_name = to_camel_case(name)
+
     try:
         os.mkdir(function_dir)
     except Exception as e:
@@ -170,18 +198,43 @@ def function(provider, type, target, name):
     with open('{}/__init__.py'.format(function_dir), 'w') as file:
         file.write('')
 
-    template = get_template(LAMBDA_APP_TEMPLATES, 'lambda_proxy_controller.jinja2')
-
     with open('{}/handler.py'.format(function_dir), 'w') as file:
-        file.write(template.render())
+        template = get_template(LAMBDA_APP_TEMPLATES, 'lambda_proxy_controller.jinja2')
+        file.write(template.render(camel_case_name=camel_case_name, name=name))
 
-    integration_test_dir = '{}/tests/functions/integration/{}'.format(target, name)
-    integration_test_expectations_dir = '{}/tests/functions/integration/{}/expectations'.format(target, name)
-    unit_test_dir = '{}/tests/functions/unit/{}'.format(target, name)
+    with open('{}/model_registrar.py'.format(models_dir), 'r') as in_file:
+        buf = in_file.readlines()
 
-    os.mkdir(integration_test_dir)
-    os.mkdir(integration_test_expectations_dir)
-    os.mkdir(unit_test_dir)
+    with open('{}/model_registrar.py'.format(models_dir), 'w') as out_file:
+        import_pattern = re.compile("from (.*?) import (.*)")
+        spec_pattern = re.compile("spec\.definition\('(.*?)', schema=(.*?)\)")
+
+        import_location = max(loc for loc, val in enumerate(buf) if import_pattern.match(val))
+        spec_location = max(loc for loc, val in enumerate(buf) if spec_pattern.match(val))
+
+        buf[import_location + 1] = 'from {} import {}Schema\n\n'.format(name, camel_case_name)
+        buf[spec_location - 1] = '\nspec.definition("{}", schema={}Schema)\n'.format(name, camel_case_name)
+
+        for line in buf:
+            out_file.write(line)
+
+    with open('{}/{}.py'.format(models_dir, name), 'w') as file:
+        template = get_template(LAMBDA_APP_TEMPLATES, 'model.jinja2')
+        file.write(template.render(camel_case_name=camel_case_name))
+
+    with open('{}/index.yaml'.format(definitions_dir), 'a') as file:
+        file.write('\n{}:\n  $ref: ./{}.yaml\n'.format(camel_case_name, name))
+
+    with open('{}/index.yaml'.format(paths_dir), 'a') as file:
+        file.write('\n/{}:\n  $ref: ./{}.yaml\n'.format(name, name))
+
+    with open('{}/{}.yaml'.format(paths_dir, name), 'a') as file:
+        template = get_template(LAMBDA_APP_TEMPLATES, 'path.jinja2')
+        file.write(template.render(camel_case_name=camel_case_name, name=name))
+
+    with open('{}/cf_template.yaml'.format(target), 'a') as file:
+        template = get_template(LAMBDA_APP_TEMPLATES, 'resource.jinja2')
+        file.write("\n\n" + template.render(camel_case_name=camel_case_name, name=name))
 
     with open('{}/test_integration_{}.py'.format(integration_test_dir, name), 'w') as file:
         template = get_template(LAMBDA_APP_TEMPLATES, 'lambda_proxy_controller_integration_test.jinja2')
@@ -194,6 +247,10 @@ def function(provider, type, target, name):
     with open('{}/test_get_method.yml'.format(integration_test_expectations_dir, name), 'w') as file:
         template = get_template(LAMBDA_APP_TEMPLATES, 'lambda_proxy_controller_get_expectation.jinja2')
         file.write(template.render(name=name))
+
+    subprocess.call("python generate_docs.py", shell=True)
+    subprocess.call("multi-file-swagger -o yaml cf_template.yaml > template.yaml", shell=True)
+    subprocess.call("multi-file-swagger -o yaml definition.yaml > swagger.yaml", shell=True)
 
     command = ['py.test', '{}/tests'.format(target)]
     subprocess.call(command)
@@ -239,7 +296,8 @@ def run_command(command, **kwargs):
 @click.command()
 @click.argument('package_name', nargs=-1)
 @click.option('--requirements/--no-requirements', default=False)
-@click.option('--requirements-file', default=VENDOR_REQUIREMENTS_FILE, help='Requirements file location', type=click.Choice([VENDOR_REQUIREMENTS_FILE]))
+@click.option('--requirements-file', default=VENDOR_REQUIREMENTS_FILE, help='Requirements file location',
+              type=click.Choice([VENDOR_REQUIREMENTS_FILE]))
 @click.option('--target', default=CWD, help='Target directory.')
 def install(*args, **kwargs):
     """
@@ -259,7 +317,8 @@ def install(*args, **kwargs):
     """
     target = kwargs.pop('target')
     vendor_dir = get_config(target)['vendor_dir']
-    package_name = kwargs.pop('package_name')[0] if ('package_name' in kwargs) and len(kwargs['package_name']) > 0 else None
+    package_name = kwargs.pop('package_name')[0] if ('package_name' in kwargs) and len(
+        kwargs['package_name']) > 0 else None
     requirements_file = kwargs.pop('requirements_file')
     vendor_dir_path = '{}/{}'.format(target, vendor_dir)
     requirements_file_path = '{}/{}'.format(target, requirements_file)
@@ -371,7 +430,7 @@ def write_schema_to_yaml(target, **kwargs):
         'Type': 'AWS::DynamoDB::Table',
         'Properties': properties
     }
-    with open('{}/schemas/dynamo/{}.yml' .format(target, table_name), 'w') as model_file:
+    with open('{}/schemas/dynamo/{}.yml'.format(target, table_name), 'w') as model_file:
         model_file.write(yaml.safe_dump(table))
 
 
@@ -444,7 +503,8 @@ def rundb(target):
     shared_db = './dynamo_db/shared-local-instance.db'
     if os.path.exists(shared_db):
         os.remove(shared_db)
-    dynamo_command = ['java', '-Djava.library.path={}/dynamo_db/DynamoDBLocal_lib'.format(CWD), '-jar', '{}/dynamo_db/DynamoDBLocal.jar'.format(CWD), '-sharedDb', '-dbPath', './dynamo_db']
+    dynamo_command = ['java', '-Djava.library.path={}/dynamo_db/DynamoDBLocal_lib'.format(CWD), '-jar',
+                      '{}/dynamo_db/DynamoDBLocal.jar'.format(CWD), '-sharedDb', '-dbPath', './dynamo_db']
     try:
         dynamo_process = subprocess.Popen(dynamo_command, stdin=subprocess.PIPE, stderr=subprocess.STDOUT)
     except Exception as e:
@@ -517,6 +577,22 @@ def artifact(*args, **kwargs):
     shutil.make_archive(zip_name, 'zip', root_dir=artifact_dir)
 
 
+@click.command()
+def build(*args, **kwargs):
+    """
+    Build the docs
+
+    :param args:
+    :param kwargs:
+    :return:
+    """
+    subprocess.call("pip install -r requirements.txt", shell=True)
+    subprocess.call("tight pip install --requirements", shell=True)
+    subprocess.call("python generate_docs.py", shell=True)
+    subprocess.call("multi-file-swagger -o yaml cf_template.yaml > template.yaml", shell=True)
+    subprocess.call("multi-file-swagger -o yaml definition.yaml > swagger.yaml", shell=True)
+
+
 main.add_command(generate)
 main.add_command(pip)
 main.add_command(dynamo)
@@ -529,3 +605,4 @@ generate.add_command(artifact)
 dynamo.add_command(generateschema)
 dynamo.add_command(installdb)
 dynamo.add_command(rundb)
+main.add_command(build)

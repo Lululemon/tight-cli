@@ -1,0 +1,17 @@
+get:
+  tags:
+  - "alive"
+  responses:
+    200:
+      description: "service is alive"
+      schema:
+        $ref: "#/definitions/IsAlive"
+  x-amazon-apigateway-integration:
+    uri:
+      Fn::Join:
+      - ''
+      - - Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${AWS::Region}:${AWS::AccountId}
+        - :function:${stageVariables.MeganavController}/invocations
+    passthroughBehavior: "when_no_match"
+    httpMethod: "POST"
+    type: "aws_proxy"

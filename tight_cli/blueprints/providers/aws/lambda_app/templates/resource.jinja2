@@ -1,0 +1,15 @@
+  {{ camel_case_name }}Function:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: "{{ name }} Function"
+      Handler: app_index.{{ name }}
+      Runtime: python3.6
+      Environment:
+        Variables:
+          PARAM1: VALUE
+      Events:
+        {{ name }}:
+          Type: Api
+          Properties:
+            Path: /{{ name }}
+            Method: get
